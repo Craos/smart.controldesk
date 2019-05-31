@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <link rel="stylesheet" href="../../smt/lib/mobiscroll/mobiscroll.javascript.lite.min.css">
+    <script src="../../smt/lib/mobiscroll/mobiscroll.javascript.lite.min.js"></script>
+    <script type="text/javascript" src="../../smt/webservice/webservice.js"></script>
+    <script type="text/javascript" src="../../smt/lib/moment/moment.js"></script>
+    <script type="text/javascript" src="../../smt/lib/moment/moment-with-locales.js"></script>
+    <script type="text/javascript" src="../js/atendimentos/mb_atendimentos.js"></script>
+    <script type="text/javascript" src="../../smt/controldesk/historico.js"></script>
+    <link rel="stylesheet" href="../css/mobile.css">
+</head>
+<body style="height: max-content">
+<div id="demo" style="height: max-content" mbsc-form>
+    <div class="mbsc-form-group">
+        <div class="mbsc-form-group-title">Detalhes do chamado</div>
+        <label>
+            Assunto
+            <input id="assunto" type="text" name="assunto" placeholder="Ex: Instabilidade" />
+        </label>
+        <label>
+            <textarea id="chamado" style="height: max-content"></textarea>
+        </label>
+    </div>
+    <div class="mbsc-form-group">
+        <div class="mbsc-form-group-title">Resposta do atendimento</div>
+        <label>
+            <textarea id="resposta" style="height: max-content"></textarea>
+        </label>
+    </div>
+    <div class="mbsc-form-group">
+        <div class="mbsc-form-group-title">Finalização</div>
+        <label>
+            Fechamento
+            <input id="fechamento" type="datetime-local" name="fechamento" placeholder="DD/MM/YYYY" />
+        </label>
+        <label>
+            Técnico
+            <input id="tecnico" type="text" name="tecnico" />
+        </label>
+        <label>
+            Categoria
+            <select id="categoria" name="categoria">
+                <option value="1">CFTV</option>
+                <option value="2">Controle de acesso</option>
+                <option value="3">Suporte de informática</option>
+            </select>
+        </label>
+        <label>
+            Tipo
+            <select id="tipo" name="tipo">
+                <option value="1">Auxílio</option>
+                <option value="2">Ocorrência</option>
+                <option value="3">Vistoria</option>
+                <option value="4">Vistoria</option>
+                <option value="5">Chamado 24hs</option>
+                <option value="6">Instalação</option>
+            </select>
+        </label>
+    </div>
+    <div class="mbsc-form-group-inset mbsc-padding">
+        <button class="mbsc-btn-block md-signup-btn">Salvar</button>
+    </div>
+</div>
+<script>
+    mobiscroll.settings = {
+        lang: 'pt-BR'
+    };
+
+    document
+        .querySelector('.md-signup-btn')
+        .addEventListener('click', AdicionarChamado);
+
+
+    let url = new URL(window.location);
+    let id = url.searchParams.get("id");
+    
+    let webservice = new Webservice();
+    
+    if (id !== null) {
+        let historico = new Historico();
+        historico.Info(id, function (response) {
+
+            if (response === null)
+                return;
+
+            let dados = response[0];
+
+            document.getElementById('assunto').value = dados.assunto;
+            document.getElementById('chamado').value = dados.chamado;
+            document.getElementById('resposta').value = dados.resposta;
+            document.getElementById('tecnico').value = dados.tecnico;
+            document.getElementById('categoria').value = dados.categoria;
+            document.getElementById('fechamento').value = moment(dados.fechamento).format('DD/MM/YYYY HH:mm:ss');
+            document.getElementById('tipo').value = tipo;
+
+        })
+    }
+
+    function AdicionarChamado() {
+
+
+        let dados ={
+            assunto: document.getElementById('assunto').value,
+            chamado: document.getElementById('chamado').value,
+            resposta: document.getElementById('resposta').value,
+            fechamento: document.getElementById('fechamento').value,
+            tecnico: document.getElementById('tecnico').value,
+            categoria: document.getElementById('categoria').value,
+            tipo: document.getElementById('tipo').value
+        };
+
+        let atendimento = new editorMensagens();
+        atendimento.AdicionarItem(dados, function (response) {
+            if (response === null) {
+                alert('Houve uma falha ao enviar as informações');
+                return;
+            }
+
+            alert('Informações enviadas com sucesso');
+            document.getElementById('assunto').value = null;
+            document.getElementById('chamado').value = null;
+            document.getElementById('resposta').value = null;
+            document.getElementById('fechamento').value = null;
+            document.getElementById('tecnico').value = null;
+            document.getElementById('categoria').value = null;
+            document.getElementById('tipo').value = null;
+        });
+
+    }
+
+</script>
+</body>
+</html>
